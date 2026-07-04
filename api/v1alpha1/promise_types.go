@@ -139,16 +139,8 @@ type WorkflowDestinationSelectors struct {
 type PromiseStatus struct {
 	// Current conditions of the Promise. Includes Available, WorksSucceeded, and Reconciled conditions
 	Conditions []metav1.Condition `json:"conditions,omitempty"`
-	// Version of the Promise, derived from the PromiseRelease if installed via one
-	Version string `json:"version,omitempty"`
 	// The generation last observed by the controller
 	ObservedGeneration int64 `json:"observedGeneration,omitempty"`
-	// The Kind of the Resource API defined by this Promise (e.g. "Database")
-	Kind string `json:"kind,omitempty"`
-	// The API version of the Resource API defined by this Promise (e.g. "marketplace.kratix.io/v1alpha1")
-	APIVersion string `json:"apiVersion,omitempty"`
-	// Overall status of the Promise: Available or Unavailable
-	Status string `json:"status,omitempty"`
 	// Message set by Promise configure workflow
 	Message string `json:"message,omitempty"`
 	// Kratix-managed status for this Promise. This field contains fields set by Kratix controllers.
@@ -163,8 +155,6 @@ type PromiseStatus struct {
 	RequiredPromises []RequiredPromiseStatus `json:"requiredPromises,omitempty"`
 	// List of other Promises that depend on this Promise
 	RequiredBy []RequiredBy `json:"requiredBy,omitempty"`
-	// Timestamp of when this Promise was last in an Available state
-	LastAvailableTime *metav1.Time `json:"lastAvailableTime,omitempty"`
 }
 
 // KratixPromiseStatus defines the status fields owned by kratix

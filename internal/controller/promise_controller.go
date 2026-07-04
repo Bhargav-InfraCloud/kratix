@@ -195,7 +195,6 @@ func (r *PromiseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 
 	// Set status to unavailable, at the end of this function we set it to
 	// available. If at any time we return early, it persisted as unavailable
-	promise.Status.Status = v1alpha1.PromiseStatusUnavailable
 	promise.Status.Kratix.Status = v1alpha1.PromiseStatusUnavailable
 
 	// Mark the Promise.Status.Conditions to Unavailable
@@ -298,7 +297,6 @@ func (r *PromiseReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 		return r.setPromiseStatusToAvailable(ctx, promise, logger)
 	}
 
-	promise.Status.Status = originalStatus
 	promise.Status.Kratix.Status = originalStatus
 	timeStamp := metav1.Time{Time: time.Now()}
 
@@ -363,8 +361,7 @@ func (r *PromiseReconciler) handlePromiseVersion(ctx context.Context, promise *v
 	var promiseVersion string
 	var found bool
 	if promiseVersion, found = promise.Labels[v1alpha1.PromiseVersionLabel]; found {
-		if promise.Status.Version != promiseVersion && promise.Status.Kratix.Version != promiseVersion {
-			promise.Status.Version = promiseVersion
+		if promise.Status.Kratix.Version != promiseVersion {
 			promise.Status.Kratix.Version = promiseVersion
 			return r.updatePromiseStatus(ctx, promise)
 		}
@@ -433,7 +430,6 @@ func (r *PromiseReconciler) setPromiseUnavailableStatusConditions(
 		available.Reason != availableCondition.Reason ||
 		available.Message != availableCondition.Message {
 		updateConditionOnPromise(promise, availableCondition)
-		promise.Status.Status = v1alpha1.PromiseStatusUnavailable
 		promise.Status.Kratix.Status = v1alpha1.PromiseStatusUnavailable
 		updated = true
 	}
@@ -642,7 +638,7 @@ func (r *PromiseReconciler) reconcileResources(ctx context.Context, logger logr.
 	// here we check if the previous promise.status.status is available
 	// and set it back to available before we update the promise status to avoid flickering promise availability
 	if originalPromiseAvailability == v1alpha1.PromiseStatusAvailable {
-		promise.Status.Status = v1alpha1.PromiseStatusAvailable
+		promise.Status.Kratix.Status = v1alpha1.PromiseStatusAvailable
 	}
 
 	return r.updatePromiseStatus(ctx, promise)
@@ -851,11 +847,9 @@ func (r *PromiseReconciler) generateStatusAndMarkRequirements(ctx context.Contex
 }
 
 func (r *PromiseReconciler) setPromiseStatusToAvailable(ctx context.Context, promise *v1alpha1.Promise, logger logr.Logger) (ctrl.Result, error) {
-	promise.Status.Status = v1alpha1.PromiseStatusAvailable
 	promise.Status.Kratix.Status = v1alpha1.PromiseStatusAvailable
 	timestamp := metav1.Time{Time: time.Now()}
 
-	promise.Status.LastAvailableTime = &timestamp
 	promise.Status.Kratix.LastAvailableTime = &timestamp
 	logging.Info(logger, "promise status set to Available")
 	updateConditionOnPromise(promise, promiseAvailableStatusCondition(timestamp))
@@ -881,8 +875,8 @@ func (r *PromiseReconciler) evaluateRequirement(ctx context.Context, promise *v1
 		r.EventRecorder.Eventf(promise, nil, v1.EventTypeNormal, "RequirementsNotInstalled", "RequirementsNotInstalled", "%s", fmt.Sprintf("Required Promise %s not installed or unknown state", required.Name))
 
 	default:
-		if required.Status.Version != req.Version || required.Status.Status != v1alpha1.PromiseStatusAvailable {
-			condition.Reason, state = generateRequirementState(required.Status.Version, req.Version, required.Status.Status)
+		if required.Status.Kratix.Version != req.Version || required.Status.Kratix.Status != v1alpha1.PromiseStatusAvailable {
+			condition.Reason, state = generateRequirementState(required.Status.Kratix.Version, req.Version, required.Status.Kratix.Status)
 			updateConditionNotFulfilled(condition, condition.Reason, "Requirements not fulfilled")
 			r.EventRecorder.Eventf(promise, nil, v1.EventTypeNormal, condition.Reason, condition.Reason, "%s", fmt.Sprintf("Waiting for required Promise %s: %s ", required.Name, state))
 		} else {
@@ -1422,16 +1416,12 @@ func (r *PromiseReconciler) ensureCRDExists(ctx context.Context, promise *v1alph
 func (r *PromiseReconciler) updateStatus(promise *v1alpha1.Promise, kind, group, version string) (bool, error) {
 	apiVersion := strings.ToLower(group + "/" + version)
 
-	if promise.Status.Kind == kind &&
-		promise.Status.Kratix.Kind == kind &&
-		promise.Status.APIVersion == apiVersion &&
+	if promise.Status.Kratix.Kind == kind &&
 		promise.Status.Kratix.APIVersion == apiVersion {
 		return false, nil
 	}
 
-	promise.Status.Kind = kind
 	promise.Status.Kratix.Kind = kind
-	promise.Status.APIVersion = apiVersion
 	promise.Status.Kratix.APIVersion = apiVersion
 	return true, r.Client.Status().Update(context.TODO(), promise)
 }
@@ -2029,7 +2019,7 @@ func (r *PromiseReconciler) markRequiredPromiseAsRequired(ctx context.Context, v
 	requiredBy := v1alpha1.RequiredBy{
 		Promise: v1alpha1.PromiseSummary{
 			Name:    promise.Name,
-			Version: promise.Status.Version,
+			Version: promise.Status.Kratix.Version,
 		},
 		RequiredVersion: version,
 	}

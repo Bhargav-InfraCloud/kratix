@@ -291,7 +291,9 @@ var _ = Describe("PromiseWebhook", func() {
 						Name: "kafka",
 					},
 					Status: v1alpha1.PromiseStatus{
-						Version: "v1.0.0",
+						Kratix: v1alpha1.KratixPromiseStatus{
+							Version: "v1.0.0",
+						},
 					},
 				})
 				Expect(err).NotTo(HaveOccurred())
@@ -339,8 +341,9 @@ var _ = Describe("PromiseWebhook", func() {
 						Name: "kafka",
 					},
 					Status: v1alpha1.PromiseStatus{
-
-						Version: "v1.2.0",
+						Kratix: v1alpha1.KratixPromiseStatus{
+							Version: "v1.2.0",
+						},
 					},
 				})
 				Expect(err).NotTo(HaveOccurred())

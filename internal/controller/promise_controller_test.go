@@ -202,9 +202,7 @@ var _ = Describe("PromiseController", func() {
 
 					By("updating the status with the CRD values", func() {
 						Expect(fakeK8sClient.Get(ctx, promiseName, promise)).To(Succeed())
-						Expect(promise.Status.APIVersion).To(Equal("marketplace.kratix.io/v1alpha1"))
 						Expect(promise.Status.Kratix.APIVersion).To(Equal("marketplace.kratix.io/v1alpha1"))
-						Expect(promise.Status.Kind).To(Equal("redis"))
 						Expect(promise.Status.Kratix.Kind).To(Equal("redis"))
 						Expect(promise.Status.Kratix.Version).To(Equal("v1.1.0"))
 					})
@@ -341,7 +339,6 @@ var _ = Describe("PromiseController", func() {
 						Expect(reconciledCond.Reason).To(Equal("RequirementsNotFulfilled"))
 						Expect(reconciledCond.LastTransitionTime).ToNot(BeNil())
 
-						Expect(promise.Status.Status).To(Equal(v1alpha1.PromiseStatusUnavailable))
 						Expect(promise.Status.Kratix.Status).To(Equal(v1alpha1.PromiseStatusUnavailable))
 						cond, condErr := getCondition(promise, v1alpha1.PromiseAvailableConditionType)
 						Expect(condErr).NotTo(HaveOccurred())
@@ -395,7 +392,6 @@ var _ = Describe("PromiseController", func() {
 							},
 						))
 
-						Expect(promise.Status.Status).To(Equal(v1alpha1.PromiseStatusUnavailable))
 						Expect(promise.Status.Kratix.Status).To(Equal(v1alpha1.PromiseStatusUnavailable))
 						cond, condErr := getCondition(promise, v1alpha1.PromiseAvailableConditionType)
 						Expect(condErr).NotTo(HaveOccurred())
@@ -440,7 +436,6 @@ var _ = Describe("PromiseController", func() {
 								},
 							))
 
-							Expect(promise.Status.Status).To(Equal(v1alpha1.PromiseStatusUnavailable))
 							Expect(promise.Status.Kratix.Status).To(Equal(v1alpha1.PromiseStatusUnavailable))
 							cond, condErr := getCondition(promise, v1alpha1.PromiseAvailableConditionType)
 							Expect(condErr).NotTo(HaveOccurred())
@@ -490,7 +485,6 @@ var _ = Describe("PromiseController", func() {
 
 							By("updating the status to indicate the promise is available", func() {
 
-								Expect(promise.Status.Status).To(Equal(v1alpha1.PromiseStatusAvailable))
 								Expect(promise.Status.Kratix.Status).To(Equal(v1alpha1.PromiseStatusAvailable))
 								cond, condErr := getCondition(promise, v1alpha1.PromiseAvailableConditionType)
 								Expect(condErr).NotTo(HaveOccurred())
@@ -530,7 +524,6 @@ var _ = Describe("PromiseController", func() {
 						Expect(err).NotTo(HaveOccurred())
 						Expect(fakeK8sClient.Get(ctx, promiseName, promise)).To(Succeed())
 
-						Expect(promise.Status.Status).To(Equal(v1alpha1.PromiseStatusAvailable))
 						Expect(promise.Status.Kratix.Status).To(Equal(v1alpha1.PromiseStatusAvailable))
 						cond, condErr := getCondition(promise, v1alpha1.PromiseAvailableConditionType)
 						Expect(condErr).NotTo(HaveOccurred())
@@ -539,7 +532,6 @@ var _ = Describe("PromiseController", func() {
 						// Make the required Promise unavailable
 						Expect(fakeK8sClient.Get(ctx, requiredKafkaPromiseName, requiredKafkaPromise)).To(Succeed())
 
-						requiredKafkaPromise.Status.Status = "Unavailable"
 						requiredKafkaPromise.Status.Kratix.Status = "Unavailable"
 						Expect(fakeK8sClient.Status().Update(ctx, requiredKafkaPromise)).To(Succeed())
 
@@ -573,7 +565,6 @@ var _ = Describe("PromiseController", func() {
 							},
 						))
 
-						Expect(promise.Status.Status).To(Equal(v1alpha1.PromiseStatusUnavailable))
 						Expect(promise.Status.Kratix.Status).To(Equal(v1alpha1.PromiseStatusUnavailable))
 						cond, condErr := getCondition(promise, v1alpha1.PromiseAvailableConditionType)
 						Expect(condErr).NotTo(HaveOccurred())
@@ -1465,7 +1456,6 @@ var _ = Describe("PromiseController", func() {
 
 				By("keeping promise as 'Available'", func() {
 
-					Expect(promise.Status.Status).To(Equal(v1alpha1.PromiseStatusAvailable))
 					Expect(promise.Status.Kratix.Status).To(Equal(v1alpha1.PromiseStatusAvailable))
 					cond, condErr := getCondition(promise, v1alpha1.PromiseAvailableConditionType)
 					Expect(condErr).NotTo(HaveOccurred())
@@ -1510,7 +1500,6 @@ var _ = Describe("PromiseController", func() {
 
 					Expect(fakeK8sClient.Get(ctx, promiseName, promise)).To(Succeed())
 
-					Expect(promise.Status.Status).To(Equal(v1alpha1.PromiseStatusAvailable))
 					Expect(promise.Status.Kratix.Status).To(Equal(v1alpha1.PromiseStatusAvailable))
 					cond, condErr := getCondition(promise, v1alpha1.PromiseAvailableConditionType)
 					Expect(condErr).NotTo(HaveOccurred())
@@ -1656,7 +1645,6 @@ var _ = Describe("PromiseController", func() {
 				By("setting the promise to 'unavailable' and 'paused' for the reconciled status.condition")
 				Expect(fakeK8sClient.Get(ctx, promiseName, promise)).To(Succeed())
 
-				Expect(promise.Status.Status).To(Equal("Unavailable"))
 				Expect(promise.Status.Kratix.Status).To(Equal("Unavailable"))
 				availableCond := apimeta.FindStatusCondition(promise.Status.Conditions, "Available")
 				Expect(availableCond).NotTo(BeNil())
@@ -1712,7 +1700,6 @@ var _ = Describe("PromiseController", func() {
 				By("setting the promise to 'unavailable' and 'suspended' for the reconciled status.condition")
 				Expect(fakeK8sClient.Get(ctx, promiseName, promise)).To(Succeed())
 
-				Expect(promise.Status.Status).To(Equal("Unavailable"))
 				Expect(promise.Status.Kratix.Status).To(Equal("Unavailable"))
 				availableCond := apimeta.FindStatusCondition(promise.Status.Conditions, "Available")
 				Expect(availableCond).NotTo(BeNil())
@@ -2384,8 +2371,6 @@ func installRequiredPromise(name, version, status string) {
 
 	Expect(err).ToNot(HaveOccurred())
 	Expect(fakeK8sClient.Get(ctx, requiredPromiseName, requiredPromise)).To(Succeed())
-	requiredPromise.Status.Status = status
-	requiredPromise.Status.Version = version
 
 	requiredPromise.Status.Kratix.Status = status
 	requiredPromise.Status.Kratix.Version = version

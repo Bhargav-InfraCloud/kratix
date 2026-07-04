@@ -226,8 +226,8 @@ func validateRequiredPromisesAreAvailable(p *v1alpha1.Promise) admission.Warning
 			promiselog.Error(err, "failed to get requirement", "requirement", requirement.Name, "version", requirement.Version)
 			continue
 		}
-		if promise.Status.Version != requirement.Version {
-			warnings = append(warnings, fmt.Sprintf("Required Promise %q installed but not at a compatible version, want: %q have: %q", requirement.Name, requirement.Version, promise.Status.Version))
+		if promise.Status.Kratix.Version != requirement.Version {
+			warnings = append(warnings, fmt.Sprintf("Required Promise %q installed but not at a compatible version, want: %q have: %q", requirement.Name, requirement.Version, promise.Status.Kratix.Version))
 		}
 	}
 
